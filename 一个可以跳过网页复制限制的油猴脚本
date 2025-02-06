@@ -1,0 +1,95 @@
+// ==UserScript==
+// @name         解除网页复制限制
+// @namespace    http://tampermonkey.net/
+// @version      0.3.0
+// @description  解除网页复制限制，允许复制文本
+// @author       You
+// @match        *://*/*
+// @grant        none
+// @run-at       document-start
+// @license      MIT
+// @updateURL    https://raw.githubusercontent.com/yourusername/yourrepository/main/unblock-copy.user.js  // 替换为你的脚本的 raw 链接，用于自动更新
+// @downloadURL  https://raw.githubusercontent.com/yourusername/yourrepository/main/unblock-copy.user.js  // 替换为你的脚本的 raw 链接，用于自动下载
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // 阻止事件传播
+    function stopEventPropagation(event) {
+        event.stopPropagation();
+    }
+
+    // 移除禁止复制的 CSS 样式
+    function removeUnselectableStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            *, ::before, ::after {
+                -webkit-user-select: auto !important;
+                -khtml-user-select: auto !important;
+                -moz-user-select: auto !important;
+                -ms-user-select: auto !important;
+                user-select: auto !important;
+            }
+            * {
+                cursor: auto !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    //移除复制限制的属性
+    function removeCopyRestrictions() {
+        document.querySelectorAll('*').forEach(element => {
+            element.removeAttribute('oncopy');
+            element.removeAttribute('oncut');
+            element.removeAttribute('onpaste');
+            element.removeAttribute('ondragstart');
+            element.removeAttribute('onselectstart');
+            element.removeAttribute('oncontextmenu');
+
+            element.style.webkitUserSelect = 'auto';
+            element.style.khtmlUserSelect = 'auto';
+            element.style.mozUserSelect = 'auto';
+            element.style.msUserSelect = 'auto';
+            element.style.userSelect = 'auto';
+        });
+    }
+
+
+    // 禁用事件监听器
+    function disableEventListeners() {
+        document.addEventListener('copy', function(e) {
+            e.stopImmediatePropagation();
+        }, true);
+        document.addEventListener('cut', function(e) {
+            e.stopImmediatePropagation();
+        }, true);
+        document.addEventListener('paste', function(e) {
+            e.stopImmediatePropagation();
+        }, true);
+        document.addEventListener('contextmenu', function(e) {
+            e.stopImmediatePropagation();
+        }, true);
+        document.addEventListener('selectstart', function(e) {
+            e.stopImmediatePropagation();
+        }, true);
+        document.addEventListener('dragstart', function(e) {
+            e.stopImmediatePropagation();
+        }, true);
+    }
+
+    // 监听 DOMContentLoaded 事件，在页面加载完成后执行操作
+    document.addEventListener('DOMContentLoaded', function() {
+        removeCopyRestrictions();
+        removeUnselectableStyles();
+        disableEventListeners();
+
+
+        console.log('网页复制限制已解除');
+    });
+
+    // 在文档开始加载时执行
+    removeUnselectableStyles(); // 提前注入样式，防止闪烁
+
+})();
